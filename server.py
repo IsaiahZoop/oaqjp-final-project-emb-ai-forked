@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from EmotionDetection import emotion_detector
+from EmotionDetection.emotion_detector import emotion_detector
 
 app = Flask(__name__)
 
@@ -7,31 +7,27 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/emotionDetector', methods=['GET', 'POST'])
-def emotion_detection_api():
-    if request.method == 'POST':
-        text_to_analyze = request.json.get('text')
-    else:  # GET method
-        text_to_analyze = request.args.get('textToAnalyze')
+@app.route('/emotionDetector')
+def emotion_detection_route():
+    text_to_analyze = request.args.get('textToAnalyze')
+    result = emotion_detector(text_to_analyze)
 
-    if not text_to_analyze:
-        return jsonify({"error": "No text provided"}), 400
+    # Check if the result has valid emotion data
+    if result['dominant_emotion'] is None:
+        return jsonify({'response': 'Invalid text! Please try again!'})
 
-    try:
-        result = emotion_detector(text_to_analyze)
-        response_text = (
-            f"For the given statement, the system response is "
-            f"'anger': {result['anger']}, "
-            f"'disgust': {result['disgust']}, "
-            f"'fear': {result['fear']}, "
-            f"'joy': {result['joy']} and "
-            f"'sadness': {result['sadness']}. "
-            f"The dominant emotion is {result['dominant_emotion']}."
-        )
-        return jsonify({"response": response_text})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # Format the response
+    formatted_response = (
+        f"For the given statement, the system response is "
+        f"'anger': {result['anger']}, "
+        f"'disgust': {result['disgust']}, "
+        f"'fear': {result['fear']}, "
+        f"'joy': {result['joy']} and "
+        f"'sadness': {result['sadness']}. "
+        f"The dominant emotion is {result['dominant_emotion']}."
+    )
 
+    return jsonify({'response': formatted_response})
 
 if __name__ == '__main__':
     app.run(debug=True)
