@@ -1,3 +1,9 @@
+"""
+server.py
+Flask server for the Emotion Detection web application.
+Handles HTTP requests and returns emotion analysis results.
+"""
+
 from flask import Flask, request, jsonify, render_template
 from EmotionDetection.emotion_detector import emotion_detector
 
@@ -5,10 +11,25 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
+    """
+    Render the home page.
+    
+    Returns:
+        HTML template for the home page.
+    """
     return render_template('index.html')
 
 @app.route('/emotionDetector')
 def emotion_detection_route():
+    """
+    Process the emotion detection request.
+    
+    Retrieves the 'textToAnalyze' query parameter from the request,
+    sends it to the emotion detection function, and formats the response.
+    
+    Returns:
+        JSON response with the formatted emotion analysis or error message.
+    """
     text_to_analyze = request.args.get('textToAnalyze')
     result = emotion_detector(text_to_analyze)
 
@@ -30,4 +51,5 @@ def emotion_detection_route():
     return jsonify({'response': formatted_response})
 
 if __name__ == '__main__':
+    # Run the Flask application in debug mode.
     app.run(debug=True)
